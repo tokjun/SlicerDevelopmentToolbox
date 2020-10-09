@@ -673,14 +673,12 @@ class ModuleLogicMixin(GeneralModuleMixin):
 
   @staticmethod
   def applyOtsuFilter(volume):
-    outputVolume = slicer.vtkMRMLScalarVolumeNode()
-    outputVolume.SetName('ZFrame_Otsu_Output')
-    slicer.mrmlScene.AddNode(outputVolume)
-    params = {'inputVolume': volume.GetID(),
-              'outputVolume': outputVolume.GetID(),
-              'insideValue': 0, 'outsideValue': 1}
-
-    slicer.cli.run(slicer.modules.otsuthresholdimagefilter, None, params, wait_for_completion=True)
+    otsuFilter = sitk.OtsuThresholdImageFilter()
+    otsuFilter.SetInsideValue(0)
+    otsuFilter.SetOutsideValue(1)
+    inputVolume = sitk.Cast(sitkUtils.PullVolumeFromSlicer(volume.GetID()), sitk.sitkInt16)
+    outputITKVolume = otsuFilter.Execute(inputVolume)
+    outputVolume = sitkUtils.PushToSlicer(outputITKVolume, "ZFrame_Otsu_Output", 0, True)
     return outputVolume
 
   @staticmethod
