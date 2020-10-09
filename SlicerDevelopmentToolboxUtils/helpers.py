@@ -2,7 +2,7 @@ import ast
 import logging
 import os
 import sys
-import urllib
+import urllib.request
 from urllib.request import FancyURLopener
 
 import vtk
@@ -113,16 +113,16 @@ class SampleDataDownloader(FancyURLopener, ParameterNodeObservationMixin):
         urllib.URLopener
     """
     self._canceled=False
-    url = urllib.unwrap(urllib.toBytes(url))
+    url = urllib.request.unwrap(urllib.request.to_bytes(url))
     if self.tempcache and url in self.tempcache:
       return self.tempcache[url]
-    type, url1 = urllib.splittype(url)
+    type, url1 = urllib.request.splittype(url)
     if filename is None and (not type or type == 'file'):
       try:
         fp = self.open_local_file(url1)
         hdrs = fp.info()
         fp.close()
-        return urllib.url2pathname(urllib.splithost(url1)[1]), hdrs
+        return urllib.request.url2pathname(urllib.request.splithost(url1)[1]), hdrs
       except IOError:
         pass
     fp = self.open(url, data)
@@ -132,10 +132,10 @@ class SampleDataDownloader(FancyURLopener, ParameterNodeObservationMixin):
         tfp = open(filename, 'wb')
       else:
         import tempfile
-        garbage, path = urllib.splittype(url)
-        garbage, path = urllib.splithost(path or "")
-        path, garbage = urllib.splitquery(path or "")
-        path, garbage = urllib.splitattr(path or "")
+        garbage, path = urllib.request.splittype(url)
+        garbage, path = urllib.request.splithost(path or "")
+        path, garbage = urllib.request.splitquery(path or "")
+        path, garbage = urllib.request.splitattr(path or "")
         suffix = os.path.splitext(path)[1]
         (fd, filename) = tempfile.mkstemp(suffix)
         self.__tempfiles.append(filename)
@@ -154,7 +154,7 @@ class SampleDataDownloader(FancyURLopener, ParameterNodeObservationMixin):
           reporthook(blocknum, bs, size)
         while not self._canceled:
           block = fp.read(bs)
-          if block == "":
+          if not block:
             break
           read += len(block)
           tfp.write(block)
@@ -168,7 +168,7 @@ class SampleDataDownloader(FancyURLopener, ParameterNodeObservationMixin):
 
     # raise exception if actual size does not match content-length header
     if size >= 0 and read < size:
-      raise urllib.ContentTooShortError("retrieval incomplete: got only %i out "
+      raise urllib.request.ContentTooShortError("retrieval incomplete: got only %i out "
                                  "of %i bytes" % (read, size), result)
 
     if self._canceled and os.path.exists(filename):
