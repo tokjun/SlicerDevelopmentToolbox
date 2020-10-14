@@ -371,7 +371,7 @@ class ModuleWidgetMixin(GeneralModuleMixin, UICreationHelpers):
   @staticmethod
   def jumpSliceNodeToTarget(sliceNode, targetNode, index):
     point = [0,0,0,0]
-    targetNode.GetMarkupPointWorld(index, 0, point)
+    targetNode.GetNthFiducialWorldCoordinates(index, point);
     sliceNode.JumpSlice(point[0], point[1], point[2])
 
   @staticmethod
@@ -808,7 +808,7 @@ class ModuleLogicMixin(GeneralModuleMixin):
   def setNodeSliceIntersectionVisibility(node, visible):
     displayNode = node.GetDisplayNode()
     if displayNode is not None:
-      displayNode.SetSliceIntersectionVisibility(visible)
+      displayNode.SetVisibility2D(visible)
 
   @staticmethod
   def isVolumeExtentValid(volume):

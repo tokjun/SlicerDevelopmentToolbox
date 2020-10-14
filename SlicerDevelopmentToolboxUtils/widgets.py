@@ -311,6 +311,7 @@ class TargetCreationWidget(qt.QWidget, ModuleWidgetMixin):
     self.currentNode = node
 
   def _createNewFiducialNode(self, name=None):
+    print("_createNewFiducialNode(self, name=None):")
     markupsLogic = slicer.modules.markups.logic()
     self.currentNode = slicer.mrmlScene.GetNodeByID(markupsLogic.AddNewFiducialNode())
     self.currentNode.SetName(name if name else self.currentNode.GetName())
@@ -327,7 +328,7 @@ class TargetCreationWidget(qt.QWidget, ModuleWidgetMixin):
   def _addTargetListObservers(self):
     self._removeTargetListObservers()
     if self.currentNode:
-      self._modifiedEventObserverTag = self.currentNode.AddObserver(vtk.vtkCommand.ModifiedEvent, self._onFiducialsUpdated)
+      self._modifiedEventObserverTag = self.currentNode.AddObserver(slicer.vtkMRMLMarkupsNode.PointModifiedEvent, self._onFiducialsUpdated)
 
   def _updateButtons(self):
     if not self.currentNode or self.currentNode.GetNumberOfFiducials() == 0:
@@ -371,7 +372,7 @@ class TargetCreationWidget(qt.QWidget, ModuleWidgetMixin):
       self.currentNode.RemoveMarkup(idx)
 
   def _onFiducialsUpdated(self, caller, event):
-    if caller.IsA("vtkMRMLMarkupsFiducialNode") and event == "ModifiedEvent":
+    if caller.IsA("vtkMRMLMarkupsFiducialNode"):
       self._updateTable()
       self._updateButtons()
       self.invokeEvent(vtk.vtkCommand.ModifiedEvent)
